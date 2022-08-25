@@ -47,6 +47,8 @@ describe('SCIM PATCH', () => {
 
     context.only('addresses', () => {
         describe('with single address in array', () => {
+            let patch: ScimPatchAddReplaceOperation;
+
             beforeEach(() => {
                 scimUser.addresses = [{
                     type: 'work',
@@ -58,20 +60,20 @@ describe('SCIM PATCH', () => {
                     country: "US",
                     primary: true
                 }];
+
+                patch = {
+                    op: "add",
+                    path: "addresses",
+                    value: ""
+                };
             });
 
             context('empty strings', () => {
-                it('adds "" to addresses[] if add address w/ empty string as value', done => {
-                    const patch: ScimPatchAddReplaceOperation = {
-                        op: "add",
-                        path: "addresses",
-                        value: ""
-                    };
-
+                it('adds "" to addresses[] if add ""', done => {
                     const patched = scimPatch(scimUser, [patch]);
 
                     if (patched?.addresses) {
-                        expect(patched?.addresses[1]).to.eq("");
+                        expect(patched?.addresses[1]).to.eq('');
                     } else {
                         expect.fail('');
                     }
@@ -79,17 +81,13 @@ describe('SCIM PATCH', () => {
                     done();
                 });
 
-                it('adds "" to addresses[] if replace addresses w/ ""', done => {
-                    const patch: ScimPatchAddReplaceOperation = {
-                        op: "replace",
-                        path: "addresses",
-                        value: ""
-                    };
+                it('adds "" to addresses[] if replace w/ ""', done => {
+                    patch.op = 'replace';
 
                     const patched = scimPatch(scimUser, [patch]);
 
                     if (patched?.addresses) {
-                        expect(patched?.addresses[1]).to.eq("");
+                        expect(patched?.addresses[1]).to.eq('');
                     } else {
                         expect.fail('');
                     }
@@ -99,17 +97,13 @@ describe('SCIM PATCH', () => {
             });
 
             context('string w/ value', () => {
-                it('adds string w/ value to addresses array if replace addresses w/ string w/ value', done => {
-                    const patch: ScimPatchAddReplaceOperation = {
-                        op: "replace",
-                        path: "addresses",
-                        value: "oh no"
-                    };
+                it('adds string to addresses[] if add string w/ value', done => {
+                    patch.value = 'oh no';
 
                     const patched = scimPatch(scimUser, [patch]);
 
                     if (patched?.addresses) {
-                        expect(patched?.addresses[1]).to.eq("oh no");
+                        expect(patched?.addresses[1]).to.eq('oh no');
                     } else {
                         expect.fail('');
                     }
@@ -117,17 +111,14 @@ describe('SCIM PATCH', () => {
                     done();
                 });
 
-                it('adds string w/ value to addresses array if replace addresses w/ string w/ value', done => {
-                    const patch: ScimPatchAddReplaceOperation = {
-                        op: "add",
-                        path: "addresses",
-                        value: "oh no"
-                    };
+                it('adds string to addresses[] if replace w/ string w/ value', done => {
+                    patch.op = 'replace';
+                    patch.value = 'oh no';
 
                     const patched = scimPatch(scimUser, [patch]);
 
                     if (patched?.addresses) {
-                        expect(patched?.addresses[1]).to.eq("oh no");
+                        expect(patched?.addresses[1]).to.eq('oh no');
                     } else {
                         expect.fail('');
                     }

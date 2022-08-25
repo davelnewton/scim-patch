@@ -21,9 +21,9 @@ export interface ScimPatchRemoveOperation {
 
 export interface ScimPatchAddReplaceOperation {
   // We accept value with capital letter to be compliant with AzureAD
-  readonly op: 'add' | 'Add' | 'replace' | 'Replace';
-  readonly path?: string;
-  readonly value?: any;
+  op: 'add' | 'Add' | 'replace' | 'Replace';
+  path?: string;
+  value?: any;
 }
 
 export interface ScimPatch {
