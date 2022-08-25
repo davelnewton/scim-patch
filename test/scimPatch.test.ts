@@ -45,7 +45,7 @@ describe('SCIM PATCH', () => {
         return done();
     });
 
-    describe.only('new tests', () => {
+    context.only('addresses', () => {
         describe('with single address in array', () => {
             beforeEach(() => {
                 scimUser.addresses = [{
@@ -60,19 +60,80 @@ describe('SCIM PATCH', () => {
                 }];
             });
 
-            it('runs this test', done => {
-                const patch: ScimPatchAddReplaceOperation = {
-                    op: "replace",
-                    path: "addresses",
-                    value: ""
-                };
+            context('empty strings', () => {
+                it('adds "" to addresses[] if add address w/ empty string as value', done => {
+                    const patch: ScimPatchAddReplaceOperation = {
+                        op: "add",
+                        path: "addresses",
+                        value: ""
+                    };
 
-                console.log(JSON.stringify(patch, null, 2));
+                    const patched = scimPatch(scimUser, [patch]);
 
-                const patched = scimPatch(scimUser, [patch]);
-                console.log(JSON.stringify(patched, null, 2));
+                    if (patched?.addresses) {
+                        expect(patched?.addresses[1]).to.eq("");
+                    } else {
+                        expect.fail('');
+                    }
 
-                done();
+                    done();
+                });
+
+                it('adds "" to addresses[] if replace addresses w/ ""', done => {
+                    const patch: ScimPatchAddReplaceOperation = {
+                        op: "replace",
+                        path: "addresses",
+                        value: ""
+                    };
+
+                    const patched = scimPatch(scimUser, [patch]);
+
+                    if (patched?.addresses) {
+                        expect(patched?.addresses[1]).to.eq("");
+                    } else {
+                        expect.fail('');
+                    }
+
+                    done();
+                });
+            });
+
+            context('string w/ value', () => {
+                it('adds string w/ value to addresses array if replace addresses w/ string w/ value', done => {
+                    const patch: ScimPatchAddReplaceOperation = {
+                        op: "replace",
+                        path: "addresses",
+                        value: "oh no"
+                    };
+
+                    const patched = scimPatch(scimUser, [patch]);
+
+                    if (patched?.addresses) {
+                        expect(patched?.addresses[1]).to.eq("oh no");
+                    } else {
+                        expect.fail('');
+                    }
+
+                    done();
+                });
+
+                it('adds string w/ value to addresses array if replace addresses w/ string w/ value', done => {
+                    const patch: ScimPatchAddReplaceOperation = {
+                        op: "add",
+                        path: "addresses",
+                        value: "oh no"
+                    };
+
+                    const patched = scimPatch(scimUser, [patch]);
+
+                    if (patched?.addresses) {
+                        expect(patched?.addresses[1]).to.eq("oh no");
+                    } else {
+                        expect.fail('');
+                    }
+
+                    done();
+                });
             });
         });
     });
