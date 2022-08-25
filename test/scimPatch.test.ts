@@ -45,8 +45,8 @@ describe('SCIM PATCH', () => {
         return done();
     });
 
-    context.only('addresses', () => {
-        describe('with single address in array', () => {
+    context('addresses', () => {
+        describe('with single address in SCIM user being patched', () => {
             let patch: ScimPatchAddReplaceOperation;
 
             beforeEach(() => {
@@ -122,6 +122,57 @@ describe('SCIM PATCH', () => {
                     } else {
                         expect.fail('');
                     }
+
+                    done();
+                });
+            });
+        });
+
+        describe('with no addresses in SCIM user being patched', () => {
+            let patch: ScimPatchAddReplaceOperation;
+
+            beforeEach(() => {
+                patch = {
+                    op: "add",
+                    path: "addresses",
+                    value: ""
+                };
+            });
+
+            context('empty strings', () => {
+                it('sets addresses to "" if add ""', done => {
+                    const patched = scimPatch(scimUser, [patch]);
+                    expect(patched.addresses).to.eq('');
+
+                    done();
+                });
+
+                it('adds "" to addresses[] if replace w/ ""', done => {
+                    patch.op = 'replace';
+
+                    const patched = scimPatch(scimUser, [patch]);
+                    expect(patched.addresses).to.eq('');
+
+                    done();
+                });
+            });
+
+            context('string w/ value', () => {
+                it('sets addresses to string w/ value', done => {
+                    patch.value = 'oh no';
+
+                    const patched = scimPatch(scimUser, [patch]);
+                    expect(patched.addresses).to.eq('oh no');
+
+                    done();
+                });
+
+                it('sets addresses if replace w/ string w/ value', done => {
+                    patch.op = 'replace';
+                    patch.value = 'oh no';
+
+                    const patched = scimPatch(scimUser, [patch]);
+                    expect(patched.addresses).to.eq('oh no');
 
                     done();
                 });
