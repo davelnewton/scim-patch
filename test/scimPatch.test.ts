@@ -45,6 +45,38 @@ describe('SCIM PATCH', () => {
         return done();
     });
 
+    describe.only('new tests', () => {
+        describe('with single address in array', () => {
+            beforeEach(() => {
+                scimUser.addresses = [{
+                    type: 'work',
+                    formatted: '123 Mission St, San Francisco, CA, 94105',
+                    streetAddress: "123 Mission St",
+                    locality: "San Francisco",
+                    region: "CA",
+                    postalCode: "94105",
+                    country: "US",
+                    primary: true
+                }];
+            });
+
+            it('runs this test', done => {
+                const patch: ScimPatchAddReplaceOperation = {
+                    op: "replace",
+                    path: "addresses",
+                    value: ""
+                };
+
+                console.log(JSON.stringify(patch, null, 2));
+
+                const patched = scimPatch(scimUser, [patch]);
+                console.log(JSON.stringify(patched, null, 2));
+
+                done();
+            });
+        });
+    });
+
     describe('replace', () => {
         it('REPLACE: first level property with path', done => {
             const expected = false;
@@ -56,12 +88,15 @@ describe('SCIM PATCH', () => {
 
         it('REPLACE: first level property with fully qualified path', done => {
             const expected = false;
-            const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'urn:ietf:params:scim:schemas:core:2.0:User:active'};
+            const patch: ScimPatchAddReplaceOperation = {
+                op: 'replace',
+                value: expected,
+                path: 'urn:ietf:params:scim:schemas:core:2.0:User:active'
+            };
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.active).to.be.eq(expected);
             return done();
         });
-
 
         it('REPLACE: first level property without path', done => {
             const expected = false;
@@ -234,7 +269,7 @@ describe('SCIM PATCH', () => {
         });
 
         it('REPLACE: array by another array', done => {
-            const expected = [ { value: 'test2' } ];
+            const expected = [{value: 'test2'}];
             const path = 'emails';
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'replace',
@@ -259,13 +294,13 @@ describe('SCIM PATCH', () => {
         });
 
         it("REPLACE: replace add fields in complex object", (done) => {
-            const expected = [ {primary: true, value: "bogus", additional:"additional"} ];
+            const expected = [{primary: true, value: "bogus", additional: "additional"}];
             // empty the surName fields.
             scimUser.surName = [{primary: true, value: "bogus"}];
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'replace',
                 path: 'surName[value eq "bogus"]',
-                value: {additional:"additional"},
+                value: {additional: "additional"},
             };
 
             const afterPatch = scimPatch(scimUser, [patch]);
@@ -274,13 +309,13 @@ describe('SCIM PATCH', () => {
         });
 
         it("REPLACE: replace add and update fields in complex object", (done) => {
-            const expected = [ {primary: true, value: "bogus2", additional:"additional"} ];
+            const expected = [{primary: true, value: "bogus2", additional: "additional"}];
             // empty the surName fields.
             scimUser.surName = [{primary: true, value: "bogus"}];
             const patch: ScimPatchAddReplaceOperation = {
                 op: 'replace',
                 path: 'surName[value eq "bogus"]',
-                value: {additional:"additional", value: "bogus2"},
+                value: {additional: "additional", value: "bogus2"},
             };
 
             const afterPatch = scimPatch(scimUser, [patch]);
@@ -299,7 +334,7 @@ describe('SCIM PATCH', () => {
         });
 
         it("REPLACE: filter with an email containing dots", (done) => {
-            const expected = [ {"value": "batman@superheroes.com","primary": true} ];
+            const expected = [{"value": "batman@superheroes.com", "primary": true}];
             const patch: ScimPatchAddReplaceOperation = {
                 op: "Replace",
                 value: "batman@superheroes.com",
@@ -314,7 +349,7 @@ describe('SCIM PATCH', () => {
         it('REPLACE: don\'t mutate the original object', done => {
             const expected = false;
             const patch: ScimPatchAddReplaceOperation = {op: 'replace', value: expected, path: 'active'};
-            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument: false});
             expect(scimUser).not.to.be.eq(afterPatch);
             return done();
         });
@@ -541,14 +576,14 @@ describe('SCIM PATCH', () => {
         });
 
         it("ADD: array", (done) => {
-            const newValue = { value: "test2" };
+            const newValue = {value: "test2"};
             const newArray = [newValue];
             const path = "emails";
             const initialArrayLength = scimUser[path].length;
             const patch: ScimPatchAddReplaceOperation = {
-              op: "Add",
-              value: newArray,
-              path,
+                op: "Add",
+                value: newArray,
+                path,
             };
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path].length).to.be.eq(
@@ -565,9 +600,9 @@ describe('SCIM PATCH', () => {
             const path = "emails";
             const initialArrayLength = scimUser[path].length;
             const patch: ScimPatchAddReplaceOperation = {
-              op: "Add",
-              value: scimUser[path],
-              path,
+                op: "Add",
+                value: scimUser[path],
+                path,
             };
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[path].length).to.be.eq(initialArrayLength);
@@ -586,7 +621,7 @@ describe('SCIM PATCH', () => {
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.addresses).to.not.be.undefined;
             expect(afterPatch.addresses?.length).to.be.eq(1);
-            if (afterPatch.addresses !== undefined){
+            if (afterPatch.addresses !== undefined) {
                 const address = afterPatch.addresses[0];
                 expect(address.type).to.be.eq("work");
                 expect(address.formatted).to.be.eq("1111 Street Rd");
@@ -607,7 +642,7 @@ describe('SCIM PATCH', () => {
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.addresses).to.not.be.undefined;
             expect(afterPatch.addresses?.length).to.be.eq(2);
-            if (afterPatch.addresses !== undefined){
+            if (afterPatch.addresses !== undefined) {
                 const existingAddress = afterPatch.addresses[0];
                 expect(existingAddress.type).to.be.eq("home");
                 expect(existingAddress.formatted).to.be.eq("2222 Avenue Blvd");
@@ -619,10 +654,14 @@ describe('SCIM PATCH', () => {
         });
 
         it("ADD: existing array add filter type + field (Azure AD) with lower case add", (done) => {
-            const patch: ScimPatchAddReplaceOperation = { op: "add",value: "1122 Street Rd", path: "addresses[type eq \"work\"].formatted" };
+            const patch: ScimPatchAddReplaceOperation = {
+                op: "add",
+                value: "1122 Street Rd",
+                path: "addresses[type eq \"work\"].formatted"
+            };
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.addresses?.length).to.be.eq(1);
-            if (afterPatch.addresses !== undefined){
+            if (afterPatch.addresses !== undefined) {
                 const newAddress = afterPatch.addresses[0];
                 expect(newAddress.type).to.be.eq("work");
                 expect(newAddress.formatted).to.be.eq("1122 Street Rd");
@@ -661,7 +700,7 @@ describe('SCIM PATCH', () => {
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch.name.nestedArray).to.not.be.undefined;
             expect(afterPatch.name.nestedArray?.length).to.be.eq(1);
-            if (afterPatch.name.nestedArray !== undefined){
+            if (afterPatch.name.nestedArray !== undefined) {
                 const address = afterPatch.name.nestedArray[0];
                 expect(address.primary).to.be.eq(true);
                 expect(address.newProperty1).to.be.eq("1111 Street Rd");
@@ -694,11 +733,11 @@ describe('SCIM PATCH', () => {
             const user: ScimUser = {
                 schemas: ["urn:ietf:params:scim:schemas:core:2.0:User"],
                 meta: {resourceType: "User", created: new Date(), lastModified: new Date(), location: "users/4"},
-                active: true, emails: [{ value:"batman@superheroes.com", primary: true }],
+                active: true, emails: [{value: "batman@superheroes.com", primary: true}],
                 name: {familyName: "bat", givenName: "man"}, userName: "batman",
                 newProperty: null
             };
-            const patch: ScimPatchAddReplaceOperation = { op: "add", path: "newProperty", value: "1" };
+            const patch: ScimPatchAddReplaceOperation = {op: "add", path: "newProperty", value: "1"};
             expect(user.newProperty).to.be.null;
 
             const afterPatch = scimPatch(user, [patch]);
@@ -743,7 +782,7 @@ describe('SCIM PATCH', () => {
                         value: "batman@superheroes.com",
                         primary: false
                     }
-            ]
+                ]
             };
 
             const afterPatch = scimPatch(scimUser, [patch]);
@@ -758,12 +797,12 @@ describe('SCIM PATCH', () => {
                 value: {
                     emails: [
                         {
-                        value: "batman@superheroes.com",
-                        primary: true
-                      },{
-                        value: "superman@superheroes.com",
-                        primary: true
-                      }]
+                            value: "batman@superheroes.com",
+                            primary: true
+                        }, {
+                            value: "superman@superheroes.com",
+                            primary: true
+                        }]
                 }
             };
 
@@ -779,7 +818,7 @@ describe('SCIM PATCH', () => {
                     emails: {
                         value: "batman@superheroes.com",
                         primary: true
-                      }
+                    }
                 }
             };
 
@@ -788,6 +827,7 @@ describe('SCIM PATCH', () => {
             return done();
         });
     });
+
     describe('remove', () => {
         it('REMOVE: with no path', done => {
             const patch = <ScimPatchRemoveOperation>{op: 'remove'};
@@ -881,7 +921,11 @@ describe('SCIM PATCH', () => {
                 {primary: false, value: 'value3'},
                 {primary: false, value: 'value3'}
             ];
-            const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.nestedArray', value: [{value: 'value2', primary: false}, {value: 'value3', primary: false}]};
+            const patch1: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'name.nestedArray',
+                value: [{value: 'value2', primary: false}, {value: 'value3', primary: false}]
+            };
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.nestedArray && afterPatch.name.nestedArray.length).to.eq(1);
             return done();
@@ -934,7 +978,7 @@ describe('SCIM PATCH', () => {
         });
 
         it('REMOVE: simple nested array elements with value supplied', done => {
-            scimUser.name.surName2  = ['value1', 'value2'];
+            scimUser.name.surName2 = ['value1', 'value2'];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.surName2', value: ['value2']};
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.surName2 && afterPatch.name.surName2.length).to.eq(1);
@@ -942,7 +986,7 @@ describe('SCIM PATCH', () => {
         });
 
         it('REMOVE: simple nested array elements with value supplied', done => {
-            scimUser.name.surName2  = ['value1', 'value2'];
+            scimUser.name.surName2 = ['value1', 'value2'];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.surName2', value: 'value2'};
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.surName2 && afterPatch.name.surName2.length).to.eq(1);
@@ -950,7 +994,7 @@ describe('SCIM PATCH', () => {
         });
 
         it('REMOVE: simple nested array elements with non-existing in scope value supplied', done => {
-            scimUser.name.surName2  = ['value1', 'value2'];
+            scimUser.name.surName2 = ['value1', 'value2'];
             const patch1: ScimPatchRemoveOperation = {op: 'remove', path: 'name.surName2', value: ['value3']};
             const afterPatch = scimPatch(scimUser, [patch1]);
             expect(afterPatch.name.surName2 && afterPatch.name.surName2.length).to.eq(2);
@@ -976,23 +1020,27 @@ describe('SCIM PATCH', () => {
             const schemaExtension = 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User';
             const patch: ScimPatchRemoveOperation = {
                 op: 'remove',
-                path: 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department'};
+                path: 'urn:ietf:params:scim:schemas:extension:enterprise:2.0:User:department'
+            };
             const afterPatch = scimPatch(scimUser, [patch]);
             expect(afterPatch[schemaExtension]?.department).not.to.exist;
             return done();
         });
 
         it('REMOVE: with unavailable nested fields', done => {
-            const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'someField.level_1_depth.level_2_depth.final_depth'};
+            const patch: ScimPatchRemoveOperation = {
+                op: 'remove',
+                path: 'someField.level_1_depth.level_2_depth.final_depth'
+            };
             const afterPatch: any = scimPatch(scimUser, [patch]);
             expect(afterPatch.someField).not.to.exist;
             return done();
         });
-          
+
         // see https://github.com/thomaspoignant/scim-patch/issues/215
         it('REPLACE: don\'t mutate the original object', done => {
             const patch: ScimPatchRemoveOperation = {op: 'remove', path: 'active'};
-            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument:false});
+            const afterPatch = scimPatch(scimUser, [patch], {mutateDocument: false});
             expect(scimUser).not.to.eq(afterPatch);
             return done();
         });

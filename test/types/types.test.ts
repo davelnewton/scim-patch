@@ -35,8 +35,14 @@ export interface ScimUser extends ScimResource {
         newProperty2?: string;
     }>;
     addresses?: Array<{
-       type: string;
-       formatted: string;
+        type?: string;
+        formatted?: string;
+        streetAddress?: string,
+        locality?: string,
+        region?: string,
+        postalCode?: string,
+        country?: string,
+        primary?: boolean,
     }>;
     roles?: Array<{
         value: string;
@@ -52,5 +58,5 @@ export interface ScimUser extends ScimResource {
         organization?: string;
         division?: string;
         department?: string;
-    }
+    };
 }
